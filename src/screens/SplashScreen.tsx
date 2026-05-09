@@ -15,7 +15,7 @@ export default function SplashScreen({ navigation }: any) {
     <View style={styles.container}>
       {/* Replace with your fox logo if you have it */}
       <Image
-        source={require("../../assets/fox-logo.png")}
+        source={require("../../assets/icon.png")}
         style={styles.logo}
       />
 
