@@ -1,24 +1,50 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform
+} from "react-native";
 import { loginUser } from "../services/auth";
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please fill all fields");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      await loginUser(email, password);
+      await loginUser(email.trim(), password);
+
       Alert.alert("Success", "Logged in!");
 
-      navigation.replace("Home"); // go to home
+      // ⚠️ MUST MATCH YOUR NAVIGATOR SCREEN NAME
+      navigation.replace("Home");
+
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      Alert.alert("Login Failed", error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
       <Text style={styles.title}>Login</Text>
 
       <TextInput
@@ -26,6 +52,7 @@ export default function LoginScreen({ navigation }: any) {
         style={styles.input}
         value={email}
         onChangeText={setEmail}
+        autoCapitalize="none"
       />
 
       <TextInput
@@ -36,8 +63,16 @@ export default function LoginScreen({ navigation }: any) {
         onChangeText={setPassword}
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleLogin}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Login</Text>
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate("Register")}>
@@ -45,14 +80,36 @@ export default function LoginScreen({ navigation }: any) {
           Create Account
         </Text>
       </TouchableOpacity>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 20 },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
-  input: { borderWidth: 1, marginBottom: 10, padding: 10, borderRadius: 8 },
-  button: { backgroundColor: "#ff6b00", padding: 15, borderRadius: 8 },
-  buttonText: { color: "#fff", textAlign: "center" },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 20
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center"
+  },
+  input: {
+    borderWidth: 1,
+    marginBottom: 10,
+    padding: 10,
+    borderRadius: 8
+  },
+  button: {
+    backgroundColor: "#ff6b00",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center"
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold"
+  }
 });

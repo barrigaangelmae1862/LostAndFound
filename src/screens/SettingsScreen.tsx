@@ -1,46 +1,46 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { logoutUser } from "../services/auth";
+import React, { useState } from "react";
+import { View, Text, Button, Alert, ActivityIndicator } from "react-native";
+import { signOut } from "firebase/auth";
+import { auth } from "../services/firebase";
 
-export default function SettingsScreen() {
+export default function SettingsScreen({ navigation }: any) {
+  const [loading, setLoading] = useState(false);
 
   const handleLogout = async () => {
+    setLoading(true);
+
     try {
-      await logoutUser();
-    } catch (error) {
-      console.log(error);
+      await signOut(auth);
+
+      Alert.alert("Logged out", "You have been signed out.");
+
+      // ⚠️ IMPORTANT: MUST MATCH YOUR LOGIN SCREEN NAME
+      navigation.replace("Login");
+
+    } catch (error: any) {
+      Alert.alert("Error", error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
+    <View style={{ flex: 1, padding: 20, justifyContent: "center" }}>
 
-      <TouchableOpacity style={styles.button} onPress={handleLogout}>
-        <Text style={styles.buttonText}>Logout</Text>
-      </TouchableOpacity>
+      <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 20 }}>
+        Settings
+      </Text>
+
+      <Text style={{ marginBottom: 20, color: "gray" }}>
+        Manage your account and app preferences
+      </Text>
+
+      {loading ? (
+        <ActivityIndicator size="large" />
+      ) : (
+        <Button title="Logout" onPress={handleLogout} color="#ff6b00" />
+      )}
+
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 22,
-    marginBottom: 20,
-    fontWeight: "bold",
-  },
-  button: {
-    backgroundColor: "red",
-    padding: 15,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-});
